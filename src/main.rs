@@ -1,7 +1,8 @@
-use whoami;
-
 use std::io::{Write, stdout, stdin};
 use std::env;
+
+use whoami;
+use dirs;
 
 fn main() {
 
@@ -17,5 +18,25 @@ fn main() {
         if line_split[0] == "exit" {
             return;
         }
+
+        match argvs_execute(&line_split) {
+            Ok(()) => {}
+            Err(e) => {
+                eprint!("{}", e);
+            }
+        }
     }
+}
+
+
+fn argvs_execute(argvs:&Vec<&str>) -> Result<(), String> {
+    if argvs[0] == "cd" {
+        if argvs.len() != 2 {
+            env::set_current_dir(dirs::home_dir().unwrap()).unwrap();
+            return Ok(());
+        }else if !env::set_current_dir(argvs[1]).is_ok() {
+           return Err(format!("cd {}: No such file or directory\n", argvs[1]));
+        }
+    }
+    return Ok(());
 }
