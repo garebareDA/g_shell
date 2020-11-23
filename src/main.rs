@@ -9,6 +9,10 @@ use whoami;
 use g_shell::built_in_command;
 
 fn main() {
+    sh_loop();
+}
+
+fn sh_loop() {
     loop {
         print!(
             "{}@{}:{} > ",
