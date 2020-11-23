@@ -69,10 +69,12 @@ fn sh_launch() -> Result<(), String> {
                     match waitpid(child, Some(WaitPidFlag::WUNTRACED)) {
                         Ok(status) => match status {
                             WaitStatus::Exited(_, _) => {
+                                println!("Exited");
                                 break;
                             }
 
                             WaitStatus::Stopped(_, _) => {
+                                println!("Stopped");
                                 break;
                             }
                             _ => {
@@ -86,7 +88,10 @@ fn sh_launch() -> Result<(), String> {
                 }
             }
         }
-        Ok(ForkResult::Child) => println!("I'm a new child process"),
+        Ok(ForkResult::Child) => {
+            println!("I'm a new child process");
+            exit(1);
+        },
         Err(_) => {
             return Err(format!("Fork Failed"));
         }
