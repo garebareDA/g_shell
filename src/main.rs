@@ -38,6 +38,13 @@ fn main() {
 }
 
 fn argvs_execute(argvs: &Vec<&str>) -> Result<(), String> {
+    match sh_launch() {
+        Ok(_) => {}
+        Err(e) => {
+            return Err(e);
+        }
+    }
+
     if argvs[0] == "cd" {
         if argvs.len() != 2 {
             env::set_current_dir(dirs::home_dir().unwrap()).unwrap();
