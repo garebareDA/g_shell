@@ -25,13 +25,7 @@ fn sh_loop() {
         let mut line = String::new();
         stdin().read_line(&mut line).expect("Faild to read line");
         line.remove(line.len() - 1);
-        let line_split: Vec<&str> = line.split(" ").collect();
-        match argvs_execute(&line_split) {
-            Ok(()) => {}
-            Err(e) => {
-                eprint!("{}", e);
-            }
-        }
+        
     }
 }
 
