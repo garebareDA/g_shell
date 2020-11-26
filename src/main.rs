@@ -7,6 +7,7 @@ use nix::unistd::*;
 use whoami;
 
 use g_shell::built_in_command;
+use g_shell::parser;
 
 fn main() {
     sh_loop();
@@ -25,19 +26,26 @@ fn sh_loop() {
         let mut line = String::new();
         stdin().read_line(&mut line).expect("Faild to read line");
         line.remove(line.len() - 1);
-        
+        let mut command = parser::parser::CommandParse::new();
+        command.run(line);
+        match argvs_execute(&command) {
+            Ok(_) => {}
+            Err(e) => {
+                eprintln!("{}", e);
+            }
+        }
     }
 }
 
-fn argvs_execute(argvs: &Vec<&str>) -> Result<(), String> {
-    match built_in_command::cd::run_cd(argvs) {
+fn argvs_execute(command: &parser::parser::CommandParse) -> Result<(), String> {
+    match built_in_command::cd::run_cd(command) {
         Ok(_) => {}
         Err(e) => {
             return Err(e);
         }
     }
 
-    match built_in_command::exit::run_exit(argvs) {
+    match built_in_command::exit::run_exit(command) {
         Ok(_) => {}
         Err(e) => {
             return Err(e);

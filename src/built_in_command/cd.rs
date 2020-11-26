@@ -2,12 +2,14 @@ use std::env;
 
 use dirs;
 
-pub fn run_cd(argvs: &Vec<&str>) -> Result<(), String> {
-  if argvs[0] == "cd" {
-    if argvs.len() != 2 {
+use super::super::parser::parser::CommandParse;
+
+pub fn run_cd(commands: &CommandParse) -> Result<(), String> {
+  if commands.command == "cd" {
+    if commands.path.trim().is_empty() {
       env::set_current_dir(dirs::home_dir().unwrap()).unwrap();
-    } else if !env::set_current_dir(argvs[1]).is_ok() {
-      return Err(format!("cd {}: No such file or directory\n", argvs[1]));
+    } else if !env::set_current_dir(&commands.path).is_ok() {
+      return Err(format!("cd {}: No such file or directory\n", commands.path));
     }
   }
   return Ok(());
