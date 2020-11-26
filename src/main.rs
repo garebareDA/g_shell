@@ -1,4 +1,5 @@
 use std::env;
+use std::ffi::{CStr, CString};
 use std::io::{stdin, stdout, Write};
 use std::process::exit;
 
@@ -52,7 +53,7 @@ fn argvs_execute(command: &parser::parser::CommandParse) -> Result<(), String> {
         }
     }
 
-    match sh_launch() {
+    match sh_launch(command) {
         Ok(_) => {}
         Err(e) => {
             return Err(e);
@@ -61,7 +62,7 @@ fn argvs_execute(command: &parser::parser::CommandParse) -> Result<(), String> {
     return Ok(());
 }
 
-fn sh_launch() -> Result<(), String> {
+fn sh_launch(command: &parser::parser::CommandParse) -> Result<(), String> {
     //子プロセスの生成
     match unsafe { fork() } {
         //親プロセス
@@ -95,9 +96,23 @@ fn sh_launch() -> Result<(), String> {
             }
         }
         //子プロセス
-        Ok(ForkResult::Child) => {
-            exit(1);
-        }
+        Ok(ForkResult::Child) => unsafe {
+            let cstring = CString::new(format!("/bin/{}", command.command)).expect("CString::new failed");
+            let cstr = CStr::from_bytes_with_nul_unchecked(cstring.to_bytes_with_nul());
+            let mut args: Vec<CString> = Vec::new();
+            args.push(CString::new("").expect("CString::new failed"));
+            let result = execv(cstr, &args);
+            match result {
+                Ok(infa) => {
+                    println!("{:?}", infa);
+                    exit(1);
+                }
+
+                Err(e) => {
+                    exit(-1);
+                }
+            }
+        },
 
         Err(_) => {
             return Err(format!("Fork Failed"));
