@@ -5,11 +5,11 @@ use dirs;
 use super::super::parser::parser::CommandParse;
 
 pub fn run_cd(commands: &CommandParse) -> Result<(), String> {
-  if commands.command == "cd" {
-    let is_path = set_current(&commands.path);
-    let is_subcommand = set_current(&commands.sub_command);
-    let is_path_empty = commands.path.trim().is_empty();
-    let is_subcommand_empty = commands.sub_command.trim().is_empty();
+  if commands.get_command() == "cd" {
+    let is_path = set_current(&commands.get_path());
+    let is_subcommand = set_current(&commands.get_sub_command());
+    let is_path_empty = commands.get_path().trim().is_empty();
+    let is_subcommand_empty = commands.get_sub_command().trim().is_empty();
 
     if is_path_empty && is_subcommand_empty {
       env::set_current_dir(dirs::home_dir().unwrap()).unwrap();
@@ -18,11 +18,11 @@ pub fn run_cd(commands: &CommandParse) -> Result<(), String> {
 
     if !(is_path || is_subcommand) {
       if !is_path_empty {
-        return Err(format!("cd : {} No such file or directory", &commands.path));
+        return Err(format!("cd : {} No such file or directory", &commands.get_path()));
       } else if !is_subcommand_empty {
         return Err(format!(
           "cd : {} No such file or directory",
-          &commands.sub_command
+          &commands.get_sub_command()
         ));
       }
     }

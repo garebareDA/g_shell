@@ -67,10 +67,10 @@ fn sh_launch(command: &parser::parser::CommandParse) -> Result<(), String> {
         //子プロセス
         Ok(ForkResult::Child) => unsafe {
             let cstring =
-                CString::new(format!("/bin/{}", command.command)).expect("CString::new failed");
+                CString::new(format!("/bin/{}", command.get_command())).expect("CString::new failed");
             let cstr = CStr::from_bytes_with_nul_unchecked(cstring.to_bytes_with_nul());
             let mut args: Vec<CString> = Vec::new();
-            args.push(CString::new("").expect("CString::new failed"));
+            push_argv(&mut args, command);
             let result = execv(cstr, &args);
             match result {
                 Ok(_) => {
@@ -89,4 +89,13 @@ fn sh_launch(command: &parser::parser::CommandParse) -> Result<(), String> {
     }
 
     return Ok(());
+}
+
+fn push_argv(argvs:&mut Vec<CString>, command:&parser::parser::CommandParse) {
+    if command.get_index() == 1 {
+        argvs.push(CString::new("").expect("CString::new failed"));
+        return;
+    }
+    argvs.push(CString::new(command.get_sub_command()).expect("CString::new failed"));
+    argvs.push(CString::new(command.get_path()).expect("CString::new failed"));
 }
