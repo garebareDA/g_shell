@@ -92,17 +92,11 @@ fn sh_launch(command: &parser::parser::CommandParse) -> Result<(), String> {
 }
 
 fn push_argv(argvs: &mut Vec<CString>, command: &parser::parser::CommandParse) {
-    if command.get_index() == 1 {
-        argvs.push(CString::new("").expect("CString::new failed"));
-        return;
-    }
-
+    argvs.push(CString::new(command.get_command()).expect("CString::new failed"));
     if command.get_sub_command() != "" {
         argvs.push(CString::new(command.get_sub_command()).expect("CString::new failed"));
     } else if command.get_path() != "" {
         argvs.push(CString::new(command.get_path()).expect("CString::new failed"));
-    } else {
-        argvs.push(CString::new("").expect("CString::new failed"));
     }
 
     for option in command.get_options() {
