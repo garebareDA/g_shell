@@ -1,10 +1,10 @@
 #[derive(Debug, Clone)]
 pub struct CommandParse {
-  pub command: String,
-  pub sub_command: String,
-  pub option: Vec<String>,
-  pub path:String,
-  pub index:usize,
+  command: String,
+  sub_command: String,
+  option: Vec<String>,
+  path:String,
+  index:usize,
 }
 
 impl CommandParse {
@@ -45,5 +45,25 @@ impl CommandParse {
     }
 
     self.sub_command = args.to_string();
+  }
+
+  pub fn get_command(&self) -> &str {
+    &self.command
+  }
+
+  pub fn get_sub_command(&self) -> &str {
+    &self.sub_command
+  }
+
+  pub fn get_path(&self) -> &str {
+    &self.path
+  }
+
+  pub fn get_index(&self) -> usize {
+    self.index
+  }
+
+  pub fn get_options(&self) -> &Vec<String>{
+    &self.option
   }
 }
