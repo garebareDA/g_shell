@@ -62,4 +62,8 @@ impl CommandParse {
   pub fn get_index(&self) -> usize {
     self.index
   }
+
+  pub fn get_options(&self) -> &Vec<String>{
+    &self.option
+  }
 }
