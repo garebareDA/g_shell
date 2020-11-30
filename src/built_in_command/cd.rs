@@ -5,7 +5,6 @@ use dirs;
 use super::super::parser::parser::CommandParse;
 
 pub fn run_cd(commands: &CommandParse) -> Result<(), String> {
-  if commands.get_command() == "cd" {
     let is_path = set_current(&commands.get_path());
     let is_subcommand = set_current(&commands.get_sub_command());
     let is_path_empty = commands.get_path().trim().is_empty();
@@ -26,8 +25,6 @@ pub fn run_cd(commands: &CommandParse) -> Result<(), String> {
         ));
       }
     }
-  }
-
   return Ok(());
 }
 

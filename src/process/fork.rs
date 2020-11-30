@@ -9,26 +9,30 @@ use super::super::parser;
 use super::signal;
 
 pub fn argvs_execute(command: &parser::parser::CommandParse) -> Result<(), String> {
-    match built_in_command::cd::run_cd(command) {
-        Ok(_) => {}
-        Err(e) => {
-            return Err(e);
+    let commands = command.get_command();
+    if commands == "cd" {
+        match built_in_command::cd::run_cd(command) {
+            Ok(_) => {}
+            Err(e) => {
+                return Err(e);
+            }
+        }
+    } else if commands == "exit" {
+        match built_in_command::exit::run_exit(command) {
+            Ok(_) => {}
+            Err(e) => {
+                return Err(e);
+            }
+        }
+    } else {
+        match sh_launch(command) {
+            Ok(_) => {}
+            Err(e) => {
+                return Err(e);
+            }
         }
     }
 
-    match built_in_command::exit::run_exit(command) {
-        Ok(_) => {}
-        Err(e) => {
-            return Err(e);
-        }
-    }
-
-    match sh_launch(command) {
-        Ok(_) => {}
-        Err(e) => {
-            return Err(e);
-        }
-    }
     return Ok(());
 }
 
