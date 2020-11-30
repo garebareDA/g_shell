@@ -6,6 +6,7 @@ use nix::unistd::*;
 
 use super::super::built_in_command;
 use super::super::parser;
+use super::signal;
 
 pub fn argvs_execute(command: &parser::parser::CommandParse) -> Result<(), String> {
     match built_in_command::cd::run_cd(command) {
@@ -44,23 +45,18 @@ fn sh_launch(command: &parser::parser::CommandParse) -> Result<(), String> {
             } else if pid < 0 {
                 return Err(format!("Error forking"));
             } else {
+                signal::signal_action();
                 //子プロセスを待つ
                 match waitpid(child, Some(WaitPidFlag::WUNTRACED)) {
                     Ok(status) => match status {
-                        WaitStatus::Exited(_, _) => {
-                            println!("Exited");
-                        }
+                        WaitStatus::Exited(_, _) => {}
 
-                        WaitStatus::Stopped(_, _) => {
-                            println!("Stopped");
-                        }
+                        WaitStatus::Stopped(_, _) => {}
                         _ => {
                             return Err(format!("Waiprocess EOF"));
                         }
                     },
-                    Err(_) => {
-                        return Err(format!("Waitprocess error"));
-                    }
+                    Err(_) => {}
                 }
             }
         }
