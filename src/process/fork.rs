@@ -78,6 +78,7 @@ fn sh_launch(command: &parser::parser::CommandParse) -> Result<(), String> {
                 }
 
                 Err(_) => {
+                    println!("{}: command not found", command.get_command());
                     exit(-1);
                 }
             }
@@ -87,7 +88,6 @@ fn sh_launch(command: &parser::parser::CommandParse) -> Result<(), String> {
             return Err(format!("Fork Failed"));
         }
     }
-
     return Ok(());
 }
 

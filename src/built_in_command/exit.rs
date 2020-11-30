@@ -7,7 +7,7 @@ pub fn run_exit(command:&CommandParse) -> Result<(), String> {
     if command.get_index() == 1 {
       exit(1);
     }else{
-      return Err(format!("exit has no subcommands and options"));
+      return Err(format!("exit has no subcommands, options and path"));
     }
   }
   return Ok(());
