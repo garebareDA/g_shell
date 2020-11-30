@@ -6,28 +6,33 @@ use nix::unistd::*;
 
 use super::super::built_in_command;
 use super::super::parser;
+use super::signal;
 
 pub fn argvs_execute(command: &parser::parser::CommandParse) -> Result<(), String> {
-    match built_in_command::cd::run_cd(command) {
-        Ok(_) => {}
-        Err(e) => {
-            return Err(e);
+    let commands = command.get_command();
+    if commands == "cd" {
+        match built_in_command::cd::run_cd(command) {
+            Ok(_) => {}
+            Err(e) => {
+                return Err(e);
+            }
+        }
+    } else if commands == "exit" {
+        match built_in_command::exit::run_exit(command) {
+            Ok(_) => {}
+            Err(e) => {
+                return Err(e);
+            }
+        }
+    } else {
+        match sh_launch(command) {
+            Ok(_) => {}
+            Err(e) => {
+                return Err(e);
+            }
         }
     }
 
-    match built_in_command::exit::run_exit(command) {
-        Ok(_) => {}
-        Err(e) => {
-            return Err(e);
-        }
-    }
-
-    match sh_launch(command) {
-        Ok(_) => {}
-        Err(e) => {
-            return Err(e);
-        }
-    }
     return Ok(());
 }
 
@@ -44,23 +49,18 @@ fn sh_launch(command: &parser::parser::CommandParse) -> Result<(), String> {
             } else if pid < 0 {
                 return Err(format!("Error forking"));
             } else {
+                signal::signal_action();
                 //子プロセスを待つ
                 match waitpid(child, Some(WaitPidFlag::WUNTRACED)) {
                     Ok(status) => match status {
-                        WaitStatus::Exited(_, _) => {
-                            println!("Exited");
-                        }
+                        WaitStatus::Exited(_, _) => {}
 
-                        WaitStatus::Stopped(_, _) => {
-                            println!("Stopped");
-                        }
+                        WaitStatus::Stopped(_, _) => {}
                         _ => {
                             return Err(format!("Waiprocess EOF"));
                         }
                     },
-                    Err(_) => {
-                        return Err(format!("Waitprocess error"));
-                    }
+                    Err(_) => {}
                 }
             }
         }
@@ -78,6 +78,7 @@ fn sh_launch(command: &parser::parser::CommandParse) -> Result<(), String> {
                 }
 
                 Err(_) => {
+                    println!("{}: command not found", command.get_command());
                     exit(-1);
                 }
             }
@@ -87,7 +88,6 @@ fn sh_launch(command: &parser::parser::CommandParse) -> Result<(), String> {
             return Err(format!("Fork Failed"));
         }
     }
-
     return Ok(());
 }
 
