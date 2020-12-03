@@ -20,15 +20,21 @@ fn sh_loop() {
         );
         stdout().flush().unwrap();
 
+        //コマンドラインを取得
         let mut line = String::new();
         stdin().read_line(&mut line).expect("Faild to read line");
         line.remove(line.len() - 1);
+
+        //コマンドの解析
         let mut command = parser::parser::CommandParse::new();
         command.run(line);
-        match process::fork::argvs_execute(&command) {
+
+        //コマンドの実行とプロセスの生成
+        let process = process::process::Process::new(&command);
+        match process.argvs_execute(){
             Ok(_) => {}
             Err(e) => {
-                eprintln!("{}", e);
+                eprint!("{}", e);
             }
         }
     }
