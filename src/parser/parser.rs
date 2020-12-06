@@ -3,8 +3,9 @@ pub struct CommandParse {
   command: String,
   sub_command: String,
   option: Vec<String>,
-  path:String,
-  index:usize,
+  path: String,
+  index: usize,
+  pipe: Option<Box<CommandParse>>,
 }
 
 impl CommandParse {
@@ -13,38 +14,56 @@ impl CommandParse {
       command: String::new(),
       sub_command: String::new(),
       option: Vec::new(),
-      path:String::new(),
-      index:0,
+      path: String::new(),
+      index: 0,
+      pipe: None,
     }
   }
 
   pub fn run(&mut self, line: String) {
-    let line_split: Vec<&str> = line.split(" ").collect();
+    let mut line_split: Vec<&str> = line.split(" ").collect();
+    self.judge_loop(&mut line_split);
+  }
+
+  fn judge_loop(&mut self, mut line_split: &mut Vec<&str>) {
+    self.index += 1;
     let line_index = line_split.len();
     self.command = line_split[0].to_string();
-    self.index += 1;
-
     loop {
       if line_index <= self.index {
         break;
       }
-      self.judge(line_split[self.index]);
+      self.judge(&mut line_split);
       self.index += 1;
     }
   }
 
-  fn judge(&mut self, args:&str) {
-    if args.contains("-") {
-      self.option.push(args.to_string());
+  fn judge(&mut self, args: &mut Vec<&str>) {
+    let arg = args[self.index];
+    if arg.contains("-") {
+      self.option.push(arg.to_string());
       return;
     }
 
-    if args.contains("/") || args.contains(".") {
-      self.path = args.to_string();
+    if arg.contains("/") || arg.contains(".") {
+      self.path = arg.to_string();
       return;
     }
 
-    self.sub_command = args.to_string();
+    if arg == "|" {
+      let mut command = CommandParse::new();
+      let mut args_split:Vec<&str> = Vec::new();
+      for index in self.index + 1 .. args.len() {
+        let split = args[index];
+        args_split.push(split);
+      }
+      command.judge_loop(&mut args_split);
+      self.pipe = Some(Box::new(command));
+      self.index += args.len() - self.index;
+      return;
+    }
+
+    self.sub_command = arg.to_string();
   }
 
   pub fn get_command(&self) -> &str {
@@ -63,7 +82,11 @@ impl CommandParse {
     self.index
   }
 
-  pub fn get_options(&self) -> &Vec<String>{
+  pub fn get_options(&self) -> &Vec<String> {
     &self.option
+  }
+
+  pub fn get_pipe(&self) -> &Option<Box<CommandParse>> {
+    &self.pipe
   }
 }
