@@ -27,6 +27,7 @@ impl Process {
                 }
             }
         } else {
+            self.signal_action();
             let command = self.get_run_command().clone();
             match self.sh_launch(&command) {
                 Ok(_) => {
@@ -49,7 +50,6 @@ impl Process {
     }
 
     fn sh_launch(&mut self, command: &parser::parser::CommandParse) -> Result<(), String> {
-        self.signal_action();
         match command.get_pipe() {
             Some(_) => match pipe() {
                 Ok(pipe) => {
@@ -88,7 +88,7 @@ impl Process {
                     self.pipe_route_connect();
                 }
 
-                let cstring = CString::new(format!("/bin/{}", command.get_command()))
+                let cstring = CString::new(command.get_command())
                     .expect("CString::new failed");
                 let cstr = CStr::from_bytes_with_nul_unchecked(cstring.to_bytes_with_nul());
                 let mut argv: Vec<CString> = Vec::new();
