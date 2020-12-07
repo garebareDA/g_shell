@@ -29,7 +29,16 @@ impl Process {
         } else {
             let command = self.get_run_command().clone();
             match self.sh_launch(&command) {
-                Ok(_) => {}
+                Ok(_) => {
+                    for pid  in self.process.iter() {
+                        match self.wait_process(*pid) {
+                            Ok(_) => {}
+                            Err(e) => {
+                                return Err(e);
+                            }
+                        }
+                    }
+                }
                 Err(e) => {
                     return Err(e);
                 }
@@ -40,7 +49,7 @@ impl Process {
     }
 
     fn sh_launch(&mut self, command: &parser::parser::CommandParse) -> Result<(), String> {
-        //プロセスの生成
+        self.signal_action();
         match command.get_pipe() {
             Some(_) => match pipe() {
                 Ok(pipe) => {
@@ -52,27 +61,30 @@ impl Process {
             },
             None => {}
         }
-
+        //プロセスの生成
         match unsafe { fork() } {
             //親プロセス
             Ok(ForkResult::Parent { child, .. }) => {
-
-                match self.wait_process(child) {
-                    Ok(()) => {
-
-                    }
-                    Err(e) => {
-                     return Err(e);
-                    }
+                self.push_process(child);
+                match command.get_pipe() {
+                    Some(pipe) => match self.sh_launch(&pipe) {
+                        Ok(()) => {
+                            self.pearent_connect_end();
+                        }
+                        Err(e) => {
+                            return Err(e);
+                        }
+                    },
+                    None => {}
                 }
-            },
+            }
             //子プロセス
             Ok(ForkResult::Child) => unsafe {
-                if !self.is_empty_pipes() && self.len_pipes() == 1 {
+                if command.get_pipe().is_some() && self.len_pipes() == 0 {
                     self.pipe_first_connect();
                 } else if !self.is_empty_pipes() && !command.get_pipe().is_some() {
                     self.pipe_end_connect();
-                } else if !self.is_empty_pipes() {
+                } else if !self.is_empty_pipes() && command.get_pipe().is_some() {
                     self.pipe_route_connect();
                 }
 
@@ -109,7 +121,6 @@ impl Process {
         } else if command.get_path() != "" {
             argvs.push(CString::new(command.get_path()).expect("CString::new failed"));
         }
-
         for option in command.get_options() {
             argvs.push(CString::new(option.to_string()).expect("CString::new failed"));
         }

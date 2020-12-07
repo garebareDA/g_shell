@@ -2,7 +2,8 @@ use super::super::parser;
 
 pub struct Process {
   run_command:parser::parser::CommandParse,
-  pipes:Vec<(i32, i32)>
+  pub pipes:Vec<(i32, i32)>,
+  pub process:Vec<nix::unistd::Pid>
 }
 
 impl Process {
@@ -10,6 +11,7 @@ impl Process {
     Self {
       run_command:command.clone(),
       pipes:Vec::new(),
+      process:Vec::new(),
     }
   }
 
@@ -31,5 +33,9 @@ impl Process {
 
   pub fn is_empty_pipes(&self) -> bool {
     self.pipes.is_empty()
+  }
+
+  pub fn push_process(&mut self, pid:nix::unistd::Pid) {
+    self.process.push(pid);
   }
 }
