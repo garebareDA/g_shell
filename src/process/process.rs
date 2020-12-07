@@ -38,4 +38,8 @@ impl Process {
   pub fn push_process(&mut self, pid:nix::unistd::Pid) {
     self.process.push(pid);
   }
+
+  pub fn get_process(&self) -> &Vec<nix::unistd::Pid> {
+    &self.process
+  }
 }

@@ -30,7 +30,7 @@ impl Process {
             let command = self.get_run_command().clone();
             match self.sh_launch(&command) {
                 Ok(_) => {
-                    for pid  in self.process.iter() {
+                    for pid in self.get_process() {
                         match self.wait_process(*pid) {
                             Ok(_) => {}
                             Err(e) => {
