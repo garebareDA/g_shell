@@ -35,6 +35,13 @@ impl Process {
     self.pipes.is_empty()
   }
 
+  pub fn pop_pipes(&mut self) {
+    if self.len_pipes() == 0 {
+      return;
+    }
+    self.pipes.pop();
+  }
+
   pub fn push_process(&mut self, pid:nix::unistd::Pid) {
     self.process.push(pid);
   }

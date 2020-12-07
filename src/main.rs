@@ -34,7 +34,7 @@ fn sh_loop() {
         match process.argvs_execute(){
             Ok(_) => {}
             Err(e) => {
-                eprint!("{}", e);
+                eprintln!("{}", e);
             }
         }
     }

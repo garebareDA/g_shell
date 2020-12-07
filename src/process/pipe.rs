@@ -43,7 +43,7 @@ impl Process {
     match close(self.get_pipe(self.len_pipes()).0) {
       Ok(_) => {}
       Err(_) => {
-        println!("pipe close error");
+        println!("end pipe close error");
         exit(-1);
       }
     }
@@ -76,26 +76,10 @@ impl Process {
       }
     }
 
-    match close(self.get_pipe(self.len_pipes() - 1).0) {
-      Ok(_) => {}
-      Err(_) => {
-        println!("pipe close error");
-        exit(-1);
-      }
-    }
-
-    match close(self.get_pipe(self.len_pipes() - 1).1) {
-      Ok(_) => {}
-      Err(_) => {
-        println!("pipe close error");
-        exit(-1);
-      }
-    }
-
     match close(self.get_pipe(self.len_pipes()).0) {
       Ok(_) => {}
       Err(_) => {
-        println!("pipe close error");
+        println!("route pipe close error");
         exit(-1);
       }
     }
@@ -103,17 +87,17 @@ impl Process {
     match close(self.get_pipe(self.len_pipes()).1) {
       Ok(_) => {}
       Err(_) => {
-        println!("pipe close error");
+        println!("route pipe close error");
         exit(-1);
       }
     }
   }
 
-  pub fn pearent_connect_end(&self) {
+  pub fn pearent_connect_end(&mut self) {
     match close(self.get_pipe(self.len_pipes()).0) {
       Ok(_) => {}
       Err(_) => {
-        println!("pipe close error");
+        println!("pearent pipe close error");
         exit(-1);
       }
     }
@@ -121,9 +105,11 @@ impl Process {
     match close(self.get_pipe(self.len_pipes()).1) {
       Ok(_) => {}
       Err(_) => {
-        println!("pipe close error");
+        println!("pearent  pipe close error");
         exit(-1);
       }
     }
+
+    self.pop_pipes();
   }
 }

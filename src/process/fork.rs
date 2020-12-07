@@ -127,7 +127,7 @@ impl Process {
     }
 
     fn wait_process(&self, child: Pid) -> Result<(), String> {
-        match waitpid(child, Some(WaitPidFlag::WUNTRACED)) {
+        match waitpid(child, Some(WaitPidFlag::WCONTINUED)) {
             Ok(status) => match status {
                 WaitStatus::Exited(_, _) => {}
 
