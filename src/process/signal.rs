@@ -4,7 +4,10 @@ use nix::sys::signal::{sigaction, SigAction, SigHandler, SigSet};
 
 use super::process;
 
-extern "C" fn handle_signal(_signam: i32) {}
+extern "C" fn handle_signal(_signam: i32) {
+  println!();
+}
+
 impl process::Process {
   pub fn signal_action(&self) {
     let sa = SigAction::new(

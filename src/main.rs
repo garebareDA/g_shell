@@ -30,11 +30,11 @@ fn sh_loop() {
         command.run(line);
 
         //コマンドの実行とプロセスの生成
-        let process = process::process::Process::new(&command);
+        let mut process = process::process::Process::new(&command);
         match process.argvs_execute(){
             Ok(_) => {}
             Err(e) => {
-                eprint!("{}", e);
+                eprintln!("{}", e);
             }
         }
     }
