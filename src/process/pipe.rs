@@ -1,115 +1,136 @@
 use nix::unistd::*;
-use std::process::exit;
 
 use super::process::Process;
 
 impl Process {
-  pub fn pipe_first_connect(&self) {
-    match dup2(self.get_pipe(self.len_pipes()).1, 1) {
-      Ok(_) => {}
-      Err(_) => {
-        println!("first pipe error");
-        exit(-1);
+  pub fn pipe_first_connect(&self) -> Result<(), String> {
+    match self.get_pipe(self.len_pipes()) {
+      Some(pipes) => {
+        match dup2(pipes.1, 1) {
+          Ok(_) => {}
+          Err(_) => {
+            return Err(format!("pipe first dup2 error"));
+          }
+        }
+
+        match self.close_pipe(pipes) {
+          Ok(_) => {}
+          Err(_) => {
+            return Err(format!("pipe first close error"));
+          }
+        }
+      }
+      None => {
+        return Err(format!("pipe first missing"));
       }
     }
 
-    match close(self.get_pipe(self.len_pipes()).0) {
-      Ok(_) => {}
-      Err(_) => {
-        println!("first pipe close error");
-        exit(-1);
-      }
-    }
-
-    match close(self.get_pipe(self.len_pipes()).1) {
-      Ok(_) => {}
-      Err(_) => {
-        println!("first pipe close error");
-        exit(-1);
-      }
-    }
+    return Ok(());
   }
 
-  pub fn pipe_end_connect(&self) {
-    match dup2(self.get_pipe(self.len_pipes()).0, 0) {
-      Ok(_) => {}
+  pub fn pipe_end_connect(&self) -> Result<(), String> {
+    match self.get_pipe(self.len_pipes()) {
+      Some(pipes) => {
+        match dup2(pipes.0, 0) {
+          Ok(_) => {}
+          Err(_) => {
+            return Err(format!("pipe close dup2 error"));
+          }
+        }
 
-      Err(_) => {
-        println!("pipe error");
-        exit(-1);
+        match self.close_pipe(pipes) {
+          Ok(_) => {}
+          Err(_) => {
+            return Err(format!("pipe end close error"));
+          }
+        }
+      }
+
+      None => {
+        return Err(format!("pipe end missing"));
       }
     }
 
-    match close(self.get_pipe(self.len_pipes()).0) {
-      Ok(_) => {}
-      Err(_) => {
-        println!("end pipe close error");
-        exit(-1);
-      }
-    }
-
-    match close(self.get_pipe(self.len_pipes()).1) {
-      Ok(_) => {}
-      Err(_) => {
-        println!("pipe close error");
-        exit(-1);
-      }
-    }
+    return Ok(());
   }
 
-  pub fn pipe_route_connect(&self) {
-    match dup2(self.get_pipe(self.len_pipes() - 1).0, 0) {
-      Ok(_) => {}
+  pub fn pipe_route_connect(&self) -> Result<(), String> {
+    match self.get_pipe(self.len_pipes() - 1) {
+      Some(pipes) => {
+        match dup2(pipes.0, 0) {
+          Ok(_) => {}
 
-      Err(_) => {
-        println!("pipe error");
-        exit(-1);
+          Err(_) => {
+            return Err(format!("pipe route dup2 error"));
+          }
+        }
+
+        match self.close_pipe(pipes) {
+          Ok(_) => {}
+          Err(_) => {
+            return Err(format!("pipe route close error"));
+          }
+        }
+      }
+
+      None => {
+        return Err(format!("pipe route missinag"));
       }
     }
 
-    match dup2(self.get_pipe(self.len_pipes()).1, 1) {
-      Ok(_) => {}
-
-      Err(_) => {
-        println!("pipe error");
-        exit(-1);
+    match self.get_pipe(self.len_pipes()) {
+      Some(pipes) => {
+        match dup2(pipes.1, 1) {
+          Ok(_) => {}
+          Err(_) => {
+            return Err(format!("pipe route dup2 error"));
+          }
+        }
+        match self.close_pipe(pipes) {
+          Ok(_) => {}
+          Err(_) => {
+            return Err(format!("pipe route close error"));
+          }
+        }
+      }
+      None => {
+        return Err(format!("pipe route missinag"));
       }
     }
 
-    match close(self.get_pipe(self.len_pipes()).0) {
-      Ok(_) => {}
-      Err(_) => {
-        println!("route pipe close error");
-        exit(-1);
-      }
-    }
-
-    match close(self.get_pipe(self.len_pipes()).1) {
-      Ok(_) => {}
-      Err(_) => {
-        println!("route pipe close error");
-        exit(-1);
-      }
-    }
+    return Ok(());
   }
 
-  pub fn pearent_connect_end(&mut self) {
-    match close(self.get_pipe(self.len_pipes()).0) {
-      Ok(_) => {}
-      Err(_) => {
-        println!("pearent pipe close error");
-        exit(-1);
+  pub fn pearent_connect_end(&mut self) -> Result<(), String> {
+    match self.get_pipe(0) {
+      Some(pipes) => match self.close_pipe(pipes) {
+        Ok(_) => {}
+        Err(_) => {
+          return Err(format!("pearent end close error"));
+        }
+      },
+      None => {
+        return Err(format!("pipe missing"));
       }
     }
 
-    match close(self.get_pipe(self.len_pipes()).1) {
+    self.deque_pipe();
+    return Ok(());
+  }
+
+  pub fn close_pipe(&self, pipe: &(i32, i32)) -> Result<(), String> {
+    match close(pipe.0) {
       Ok(_) => {}
       Err(_) => {
-        println!("pearent  pipe close error");
-        exit(-1);
+        return Err(format!("pipe close error"));
       }
     }
-
-    self.pop_pipes();
+    match close(pipe.1) {
+      Ok(_) => {}
+      Err(_) => {
+        return Err(format!("pipe clsoe error"));
+      }
+    }
+    return Ok(());
   }
 }

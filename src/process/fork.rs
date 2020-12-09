@@ -50,6 +50,7 @@ impl Process {
     }
 
     fn sh_launch(&mut self, command: &parser::parser::CommandParse) -> Result<(), String> {
+        let is_empty = !self.is_empty_pipes();
         match command.get_pipe() {
             Some(_) => match pipe() {
                 Ok(pipe) => {
@@ -68,28 +69,52 @@ impl Process {
                 self.push_process(child);
                 match command.get_pipe() {
                     Some(pipe) => match self.sh_launch(&pipe) {
-                        Ok(()) => {
-                            self.pearent_connect_end();
-                        }
+                        Ok(()) => {}
                         Err(e) => {
                             return Err(e);
                         }
                     },
                     None => {}
                 }
+
+                if is_empty {
+                    match self.pearent_connect_end() {
+                        Ok(_) => {}
+                        Err(e) => {
+                            return Err(e);
+                        }
+                    }
+                }
             }
             //子プロセス
             Ok(ForkResult::Child) => unsafe {
                 if command.get_pipe().is_some() && self.len_pipes() == 0 {
-                    self.pipe_first_connect();
+                    match self.pipe_first_connect() {
+                        Ok(_) => {}
+                        Err(e) => {
+                            println!("{}", e);
+                            exit(-1);
+                        }
+                    }
                 } else if !self.is_empty_pipes() && !command.get_pipe().is_some() {
-                    self.pipe_end_connect();
+                    match self.pipe_end_connect() {
+                        Ok(_) => {}
+                        Err(e) => {
+                            println!("{}", e);
+                            exit(-1);
+                        }
+                    }
                 } else if !self.is_empty_pipes() && command.get_pipe().is_some() {
-                    self.pipe_route_connect();
+                    match self.pipe_route_connect() {
+                        Ok(_) => {}
+                        Err(e) => {
+                            println!("{}", e);
+                            exit(-1);
+                        }
+                    }
                 }
 
-                let cstring = CString::new(command.get_command())
-                    .expect("CString::new failed");
+                let cstring = CString::new(command.get_command()).expect("CString::new failed");
                 let cstr = CStr::from_bytes_with_nul_unchecked(cstring.to_bytes_with_nul());
                 let mut argv: Vec<CString> = Vec::new();
                 self.push_argv(&mut argv);

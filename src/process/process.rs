@@ -1,17 +1,17 @@
 use super::super::parser;
 
 pub struct Process {
-  run_command:parser::parser::CommandParse,
-  pub pipes:Vec<(i32, i32)>,
-  pub process:Vec<nix::unistd::Pid>
+  run_command: parser::parser::CommandParse,
+  pub pipes: Vec<(i32, i32)>,
+  pub process: Vec<nix::unistd::Pid>,
 }
 
 impl Process {
-  pub fn new(command:&parser::parser::CommandParse) -> Self {
+  pub fn new(command: &parser::parser::CommandParse) -> Self {
     Self {
-      run_command:command.clone(),
-      pipes:Vec::new(),
-      process:Vec::new(),
+      run_command: command.clone(),
+      pipes: Vec::new(),
+      process: Vec::new(),
     }
   }
 
@@ -19,7 +19,7 @@ impl Process {
     &self.run_command
   }
 
-  pub fn push_pipe(&mut self, pipe:(i32, i32)) {
+  pub fn push_pipe(&mut self, pipe: (i32, i32)) {
     self.pipes.push(pipe);
   }
 
@@ -27,8 +27,8 @@ impl Process {
     self.pipes.len() - 1
   }
 
-  pub fn get_pipe(&self, index: usize) -> (i32, i32) {
-    self.pipes[index]
+  pub fn get_pipe(&self, index: usize) -> Option<&(i32, i32)> {
+    self.pipes.get(index)
   }
 
   pub fn is_empty_pipes(&self) -> bool {
@@ -42,7 +42,14 @@ impl Process {
     self.pipes.pop();
   }
 
-  pub fn push_process(&mut self, pid:nix::unistd::Pid) {
+  pub fn deque_pipe(&mut self) {
+    if self.len_pipes() == 0 {
+      return;
+    }
+    self.pipes.remove(0);
+  }
+
+  pub fn push_process(&mut self, pid: nix::unistd::Pid) {
     self.process.push(pid);
   }
 
