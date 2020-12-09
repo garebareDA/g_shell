@@ -10,6 +10,7 @@ use super::process::Process;
 
 impl Process {
     pub fn argvs_execute(&mut self) -> Result<(), String> {
+        self.signal_action();
         let command = self.get_run_command();
         let commands = self.get_run_command().get_command();
         if commands == "cd" {
@@ -27,7 +28,6 @@ impl Process {
                 }
             }
         } else {
-            self.signal_action();
             let command = self.get_run_command().clone();
             match self.sh_launch(&command) {
                 Ok(_) => {
@@ -67,6 +67,14 @@ impl Process {
             //親プロセス
             Ok(ForkResult::Parent { child, .. }) => {
                 self.push_process(child);
+                if is_empty {
+                    match self.pearent_connect_end() {
+                        Ok(_) => {}
+                        Err(e) => {
+                            return Err(e);
+                        }
+                    }
+                }
                 match command.get_pipe() {
                     Some(pipe) => match self.sh_launch(&pipe) {
                         Ok(()) => {}
@@ -75,15 +83,6 @@ impl Process {
                         }
                     },
                     None => {}
-                }
-
-                if is_empty {
-                    match self.pearent_connect_end() {
-                        Ok(_) => {}
-                        Err(e) => {
-                            return Err(e);
-                        }
-                    }
                 }
             }
             //子プロセス
