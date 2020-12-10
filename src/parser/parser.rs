@@ -56,7 +56,7 @@ impl CommandParse {
       return;
     }
 
-    if arg.chars().nth(1).unwrap() == '-' {
+    if arg.chars().nth(0).unwrap() == '-' {
       self.option.push(arg.to_string());
       return;
     }
