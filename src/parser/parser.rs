@@ -46,11 +46,13 @@ impl CommandParse {
     let arg = args[self.index];
 
     if arg.chars().nth(1).unwrap() == '>' {
-      if arg.chars().nth(2).unwrap() == '>' {
+      if arg.len() == 2 && arg.chars().nth(2).unwrap() == '>' {
         return;
       }
-
-
+      self.index += 1;
+      let arg = args[self.index];
+      self.redirect = Some(Redirect::new(arg, false));
+      return;
     }
 
     if arg.chars().nth(1).unwrap() == '-' {
@@ -101,5 +103,9 @@ impl CommandParse {
 
   pub fn get_pipe(&self) -> &Option<Box<CommandParse>> {
     &self.pipe
+  }
+
+  pub fn get_redirect(&self) -> &Option<Redirect> {
+    &self.redirect
   }
 }

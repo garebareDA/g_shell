@@ -12,7 +12,7 @@ impl Redirect {
     }
   }
 
-  pub fn get_redirect_command(&self) -> &str {
+  pub fn get_redirect_path(&self) -> &str {
     &self.path
   }
 

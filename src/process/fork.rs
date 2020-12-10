@@ -117,6 +117,14 @@ impl Process {
                     }
                 }
 
+                match command.get_redirect() {
+                    Some(redirect) => {
+                        let path = redirect.get_redirect_path();
+                        
+                    }
+                    None => {}
+                }
+
                 let cstring = CString::new(command.get_command()).expect("CString::new failed");
                 let cstr = CStr::from_bytes_with_nul_unchecked(cstring.to_bytes_with_nul());
                 let mut argv: Vec<CString> = Vec::new();
