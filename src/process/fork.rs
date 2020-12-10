@@ -13,6 +13,11 @@ impl Process {
         self.signal_action();
         let command = self.get_run_command();
         let commands = self.get_run_command().get_command();
+
+        if commands == "" {
+            return Ok(());
+        }
+
         if commands == "cd" {
             match built_in_command::cd::run_cd(command) {
                 Ok(_) => {}
@@ -45,7 +50,6 @@ impl Process {
                 }
             }
         }
-
         return Ok(());
     }
 

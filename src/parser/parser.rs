@@ -1,3 +1,5 @@
+use super::redirect::Redirect;
+
 #[derive(Debug, Clone)]
 pub struct CommandParse {
   command: String,
@@ -6,6 +8,7 @@ pub struct CommandParse {
   path: String,
   index: usize,
   pipe: Option<Box<CommandParse>>,
+  redirect: Option<Redirect>,
 }
 
 impl CommandParse {
@@ -17,6 +20,7 @@ impl CommandParse {
       path: String::new(),
       index: 0,
       pipe: None,
+      redirect: None,
     }
   }
 
@@ -40,7 +44,16 @@ impl CommandParse {
 
   fn judge(&mut self, args: &mut Vec<&str>) {
     let arg = args[self.index];
-    if arg.contains("-") {
+
+    if arg.chars().nth(1).unwrap() == '>' {
+      if arg.chars().nth(2).unwrap() == '>' {
+        return;
+      }
+
+
+    }
+
+    if arg.chars().nth(1).unwrap() == '-' {
       self.option.push(arg.to_string());
       return;
     }
