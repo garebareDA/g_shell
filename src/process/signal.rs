@@ -9,7 +9,7 @@ extern "C" fn handle_signal(_signam: i32) {
 }
 
 impl process::Process {
-  pub fn signal_action(&self) {
+  pub(crate) fn signal_action(&self) {
     let sa = SigAction::new(
       SigHandler::Handler(handle_signal),
       SaFlags::SA_RESETHAND,

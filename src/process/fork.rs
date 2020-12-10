@@ -13,6 +13,11 @@ impl Process {
         self.signal_action();
         let command = self.get_run_command();
         let commands = self.get_run_command().get_command();
+
+        if commands == "" {
+            return Ok(());
+        }
+
         if commands == "cd" {
             match built_in_command::cd::run_cd(command) {
                 Ok(_) => {}
@@ -45,7 +50,6 @@ impl Process {
                 }
             }
         }
-
         return Ok(());
     }
 
@@ -111,6 +115,28 @@ impl Process {
                             exit(-1);
                         }
                     }
+                }
+
+                match command.get_redirect() {
+                    Some(redirect) => {
+                        let path = redirect.get_redirect_path();
+                        if redirect.get_is_over() {
+                            match self.redirect(path) {
+                                Ok(_) => {}
+                                Err(e) => {
+                                    return Err(e);
+                                }
+                            }
+                        } else {
+                            match self.over_redirect(path) {
+                                Ok(_) => {}
+                                Err(e) => {
+                                    return Err(e);
+                                }
+                            }
+                        }
+                    }
+                    None => {}
                 }
 
                 let cstring = CString::new(command.get_command()).expect("CString::new failed");
