@@ -120,7 +120,21 @@ impl Process {
                 match command.get_redirect() {
                     Some(redirect) => {
                         let path = redirect.get_redirect_path();
-                        
+                        if redirect.get_is_over() {
+                            match self.redirect(path) {
+                                Ok(_) => {}
+                                Err(e) => {
+                                    return Err(e);
+                                }
+                            }
+                        } else {
+                            match self.over_redirect(path) {
+                                Ok(_) => {}
+                                Err(e) => {
+                                    return Err(e);
+                                }
+                            }
+                        }
                     }
                     None => {}
                 }

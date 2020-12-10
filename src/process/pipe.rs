@@ -3,7 +3,7 @@ use nix::unistd::*;
 use super::process::Process;
 
 impl Process {
-  pub fn pipe_first_connect(&self) -> Result<(), String> {
+  pub(crate) fn pipe_first_connect(&self) -> Result<(), String> {
     match self.get_pipe(self.len_pipes()) {
       Some(pipes) => {
         match dup2(pipes.1, 1) {
@@ -28,7 +28,7 @@ impl Process {
     return Ok(());
   }
 
-  pub fn pipe_end_connect(&self) -> Result<(), String> {
+  pub(crate) fn pipe_end_connect(&self) -> Result<(), String> {
     match self.get_pipe(self.len_pipes()) {
       Some(pipes) => {
         match dup2(pipes.0, 0) {
@@ -54,7 +54,7 @@ impl Process {
     return Ok(());
   }
 
-  pub fn pipe_route_connect(&self) -> Result<(), String> {
+  pub(crate) fn pipe_route_connect(&self) -> Result<(), String> {
     match self.get_pipe(self.len_pipes() - 1) {
       Some(pipes) => {
         match dup2(pipes.0, 0) {
@@ -101,7 +101,7 @@ impl Process {
     return Ok(());
   }
 
-  pub fn pearent_connect_end(&mut self) -> Result<(), String> {
+  pub(crate) fn pearent_connect_end(&mut self) -> Result<(), String> {
     match self.get_pipe(0) {
       Some(pipes) => match self.close_pipe(pipes) {
         Ok(_) => {}
@@ -118,7 +118,7 @@ impl Process {
     return Ok(());
   }
 
-  pub fn close_pipe(&self, pipe: &(i32, i32)) -> Result<(), String> {
+  pub(crate) fn close_pipe(&self, pipe: &(i32, i32)) -> Result<(), String> {
     match close(pipe.0) {
       Ok(_) => {}
       Err(_) => {

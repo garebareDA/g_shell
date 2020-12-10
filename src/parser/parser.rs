@@ -45,12 +45,13 @@ impl CommandParse {
   fn judge(&mut self, args: &mut Vec<&str>) {
     let arg = args[self.index];
 
-    if arg.chars().nth(1).unwrap() == '>' {
-      if arg.len() == 2 && arg.chars().nth(2).unwrap() == '>' {
-        return;
-      }
+    if arg.chars().nth(0).unwrap() == '>' {
       self.index += 1;
       let arg = args[self.index];
+      if arg.len() == 2 && arg.chars().nth(1).unwrap() == '>' {
+        self.redirect = Some(Redirect::new(arg, true));
+        return;
+      }
       self.redirect = Some(Redirect::new(arg, false));
       return;
     }
@@ -67,8 +68,8 @@ impl CommandParse {
 
     if arg == "|" {
       let mut command = CommandParse::new();
-      let mut args_split:Vec<&str> = Vec::new();
-      for index in self.index + 1 .. args.len() {
+      let mut args_split: Vec<&str> = Vec::new();
+      for index in self.index + 1..args.len() {
         let split = args[index];
         args_split.push(split);
       }
